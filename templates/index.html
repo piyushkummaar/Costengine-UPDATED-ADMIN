@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Cost Engine</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light">
+          <div class='container mx-auto'>
+              <a class="navbar-brand" href="/">
+                  <h3>
+            <img src="{% static 'cimage.png'%}" width="35" height="35" class="d-inline-block align-top" alt="">ostengine</h3>
+          </a>
+          </div>
+        </nav>
+    <div class="container mt-5">
+
+        <div class="col-md-6 mx-auto">
+        <!--<h1 class="text-center">Cost Engine</h1>-->
+         <div class="card shadow border-secondary">
+             <div class="card-body">
+                     <form id='myform' action="{% url 'home' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="sel1">Domestic/Imports</label>
+                            <select class="form-control btn-outline-secondary" id="sel1" name="region">
+                              <option>--Select--</option>
+                              {% for data in reg %}
+                              <option id="{{ data.id }}">{{ data }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="form-group" id="sel2">
+                            <label>Category</label>
+                            <select class='form-control btn-outline-secondary' id='ddlcat'>
+                                <!-- <option>-Select-</option> -->
+                            </select>
+                          </div>
+                          <div class="form-group" id="sel3">
+                            <label>Sub Category</label>
+                            <select class='form-control btn-outline-secondary' id='ddlsubcat'>
+                                <!-- <option>-Select-</option> -->
+                            </select>
+                          </div>
+                          <div class="form-group" id="product">
+                            <label>Products</label>
+                            <select class='form-control btn-outline-secondary' id='ddlpro' name="sku">
+                                <!-- <option>-Select-</option> -->
+                            </select>
+                          </div>
+                          <button type="submit" class="btn btn-success float-right">Search</button>
+                     </form>
+                 </div>
+             </div>
+         </div>
+         <!-- ======================Domestic===================== -->
+         <div id='table' class="container mt-5">
+            {% if prodata%}
+            {% for item in prodata %}
+            <div class="text-center mx-auto">
+                <h1 style="text-align:center;">
+                    <strong class="text-primary">{{ item.productname }}</strong>
+                </h1>
+            </div>
+            <div class="table-responsive table-striped shadow" id="tableaagyga" >
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Item Number</th>
+                            <th scope="col">{{ item.sku }}</th>
+                            {% for i in test %}
+                            <th scope="col"></th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <tr>
+                            <th scope="row">Quantities</th>
+                            {% for i in items %}
+                            <td> {{i.quantity}} </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">Fixed Cost</th>
+                            {% for i in items %}
+                            <td> {{i.price}} </td>
+                            {% endfor %}
+                        </tr>
+                            <tr style="background-color: rgb(142, 253, 253);" id='pcc'>
+                            <th scope="row">Product Cost C$</th>
+                            {% for i in items %}
+                            <td> {{i.productcost}} </td>
+                            {% endfor %}
+                        </tr>
+                            <tr id='inp'>
+                            <th scope="row">Target Gross Profit(in%)</th>
+                            {% for i in items %}
+                            <td><input type="number" min="0" max="100" value="{{ item.targetgrossprofit }}" class="tgp" size="5"></td>
+                            {% endfor %}
+                            </tr>
+                            <tr style="background-color: rgb(142, 253, 253);" id='bcps'>
+                            <th scope="row">Base Product Sales Price C$</th>
+                            {% for i in items %}
+                            <td> {{i.baseproductsalesprice}} </td>
+                            {% endfor %}
+                        </tr>
+                        <tr style="background-color: yellow">
+                            <th>Options</th>
+                            {% for i in items %}
+                            <td>  </td>
+                            {% endfor %}
+                    </tr>
+                    <tr style="background-color: rgb(34, 247, 97);">
+                        <th>
+                            Markup Rate(in %) :
+                            <input id="mrk" type="number" size="5" value="{{item.markup}}">
+                         </th>
+                        {% for i in items %}
+                        <td>  </td>
+                        {% endfor %}
+                    </tr>
+                    {% for opt in options%}
+                    {% if item.sku == opt.sku %}
+                    <tr class="optval">
+                       <th scope="row">{{opt}} : <input type="number" value="{{opt.optionvalue}}" class="optcls" style="width:60px"/>
+                           <select name="option"  width="3" class="ddlopt" id="opt{{opt.id}}">
+                               <option value="N">No</option>
+                               <option value="Y">Yes</option>
+                             </select>
+                       </th>
+                       {% for i in items %}
+                            <td class="tdopt"> 0 </td>
+                       {% endfor %}
+                   </tr>
+                   {% endif %}
+             {% endfor %}
+                   <tr id='tos'>
+                       <th>Total Options :</th>
+                       {% for i in items %}
+                       <td> 0 </td>
+                       {% endfor %}
+                   </tr>
+                   <tr style="background-color: greenyellow">
+                       <th></th>
+                       {% for i in items %}
+                       <td>  </td>
+                       {% endfor %}
+                   </tr>
+                   <tr id='tsp'>
+                       <th>Total Sales Price Net/Unit C$ :</th>
+                       {% for i in items %}
+                       <td>  </td>
+                       {% endfor %}
+                   </tr>
+                   <tr id='fly'>
+                       <th>Flyer Price(C) :</th>
+                       {% for i in items %}
+                       <td>  </td>
+                       {% endfor %}
+                   </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+            {% endif %}
+         </div>
+
+<!-- ============================Domestic(Size)======================================== -->
+<div id='table' class="container mt-5">
+    {% if domesticSizedata%}
+    {% for item in domesticSizedata %}
+    <div class="text-center mx-auto">
+        <h1 style="text-align:center;">
+            <strong class="text-primary">{{ item.productname }}</strong>
+        </h1>
+    </div>
+    <div class="table-responsive table-striped shadow" id="tableaagyga" >
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Item Number</th>
+                    <th scope="col">{{ item.sku }}</th>
+                    {% for i in test %}
+                    <th scope="col"></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <tr>
+                    <th scope="row">Quantities</th>
+                    {% for i in items %}
+                    <td> {{i.quantity}} </td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th scope="row">Size</th>
+                    <td>
+                    {% for i in items %}
+                    <ol>
+                        {% for area in i.size.all %}<li>{{ area }}</li>{% endfor %}
+                    </ol>    
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th scope="row">Fixed Cost</th>
+                    {% for i in items %}
+                    <td> {{i.price}} </td>
+                    {% endfor %}
+                </tr>
+                    <tr style="background-color: rgb(142, 253, 253);" id='pcc'>
+                    <th scope="row">Product Cost C$</th>
+                    {% for i in items %}
+                    <td> {{i.productcost}} </td>
+                    {% endfor %}
+                </tr>
+                    <tr id='inp'>
+                    <th scope="row">Target Gross Profit(in%)</th>
+                    {% for i in items %}
+                    <td><input type="number" min="0" max="100" value="{{ item.targetgrossprofit }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    <tr style="background-color: rgb(142, 253, 253);" id='bcps'>
+                    <th scope="row">Base Product Sales Price C$</th>
+                    {% for i in items %}
+                    <td> {{i.baseproductsalesprice}} </td>
+                    {% endfor %}
+                </tr>
+                <tr style="background-color: yellow">
+                    <th>Options</th>
+                    {% for i in items %}
+                    <td>  </td>
+                    {% endfor %}
+            </tr>
+            <tr style="background-color: rgb(34, 247, 97);">
+                <th>
+                    Markup Rate(in %) :
+                    <input id="mrk" type="number" size="5" value="{{item.markup}}">
+                 </th>
+                {% for i in items %}
+                <td>  </td>
+                {% endfor %}
+            </tr>
+            {% for opt in options%}
+            {% if item.sku == opt.sku %}
+            <tr class="optval">
+               <th scope="row">{{opt}} : <input type="number" value="{{opt.optionvalue}}" class="optcls" style="width:60px"/>
+                   <select name="option"  width="3" class="ddlopt" id="opt{{opt.id}}">
+                       <option value="N">No</option>
+                       <option value="Y">Yes</option>
+                     </select>
+               </th>
+               {% for i in items %}
+                    <td class="tdopt"> 0 </td>
+               {% endfor %}
+           </tr>
+           {% endif %}
+     {% endfor %}
+           <tr id='tos'>
+               <th>Total Options :</th>
+               {% for i in items %}
+               <td> 0 </td>
+               {% endfor %}
+           </tr>
+           <tr style="background-color: greenyellow">
+               <th></th>
+               {% for i in items %}
+               <td>  </td>
+               {% endfor %}
+           </tr>
+           <tr id='tsp'>
+               <th>Total Sales Price Net/Unit C$ :</th>
+               {% for i in items %}
+               <td>  </td>
+               {% endfor %}
+           </tr>
+           <tr id='fly'>
+               <th>Flyer Price(C) :</th>
+               {% for i in items %}
+               <td>  </td>
+               {% endfor %}
+           </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    {% endif %}
+ </div>
+
+<!-- =============================Domesctic (RAw)========================= -->
+<div id='table' class="container mt-5">
+    {% if domesticRawdata%}
+    {% for item in domesticRawdata %}
+    <div class="text-center mx-auto">
+        <h1 style="text-align:center;">
+            <strong class="text-primary">{{ item.productname }}</strong>
+        </h1>
+    </div>
+    <div class="table-responsive table-striped shadow" id="tableaagyga" >
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Item Number</th>
+                    <th scope="col">{{ item.sku }}</th>
+                    {% for i in test %}
+                    <th scope="col"></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <tr>
+                    <th scope="row">Quantities</th>
+                    {% for i in items %}
+                    <td> {{i.quantity}} </td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th scope="row">MARKET VALUE</th>
+                    {% for i in items %}
+                    <!-- <td> {{i.marketval}} </td> -->
+                    <td><input type="number" min="0" max="100" value="{{i.marketval}}" class="tgp" size="5"></td>
+                    {% endfor %}
+                </tr>
+                    <tr style="background-color: rgb(142, 253, 253);" id='pcc'>
+                    <th scope="row">DISRIBUTOR COST</th>
+                    {% for i in items %}                    
+                    <td><input type="number" min="0" max="100" value="{{i.distributorcost}}" class="tgp" size="5"></td>
+                    {% endfor %}
+                </tr>
+                    <tr>
+                    <th scope="row">1ST COST</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.price }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.price }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    <tr>
+                    <th scope="row">TOTAL LANDED COST</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.totallandedcost }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.totallandedcost }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    <th scope="row">LANDED DUTY PAID</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.ldp }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.ldp }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    <th scope="row">PRINT</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.printval }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.printval }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    
+                    <th scope="row">OVERHEAD</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.overhead }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.overhead }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    
+                    <th scope="row">TOTAL COST</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.totalcost }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.totalcost }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+
+                    <th scope="row">NET SELL PRICE</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.netsellprice }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.netsellprice }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+
+                    <th scope="row">MARKUP</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.markup }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.markup }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+
+                    <th scope="row">$$ ON NET SELL PRICE</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.onnetsell }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.onnetsell }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+                    
+                    <th scope="row">MARGINONSELL</th>
+                    {% for i in items %}
+                        <!-- <td>{{ i.marginonsell }}</td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.marginonsell }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                    </tr>
+
+                    <tr id='bcps'>
+                    <th scope="row">LIST PRICE</th>
+                    {% for i in items %}
+                    <!-- <td> {{i.listprice}} </td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.listprice }}" class="tgp" size="5"></td>
+
+                    {% endfor %}
+                </tr>
+
+                <tr style="background-color: rgb(142, 253, 253);" id='bcps'>
+                    <th scope="row">DISTRIBUTORMARGIN</th>
+                    {% for i in items %}
+                    <!-- <td> {{i.distributormargin}} </td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.distributormargin }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                </tr>
+                <tr style="background-color: rgb(142, 253, 253);" id='bcps'>
+                    <th scope="row">DISTRIBUTOR $$</th>
+                    {% for i in items %}
+                    <!-- <td> {{i.distributor}} </td> -->
+                    <td><input type="number" min="0" max="100" value="{{ i.distributor }}" class="tgp" size="5"></td>
+                    {% endfor %}
+                </tr>
+                <tr style="background-color: yellow">
+                    <th>Options</th>
+                    {% for i in items %}
+                    <td>  </td>
+                    {% endfor %}
+            </tr>
+            <tr style="background-color: rgb(34, 247, 97);">
+                <th>
+                    Markup Rate(in %) :
+                    <input id="mrk" type="number" size="5" value="{{item.markup}}">
+                 </th>
+                {% for i in items %}
+                <td>  </td>
+                {% endfor %}
+            </tr>
+            {% for opt in options%}
+            {% if item.sku == opt.sku %}
+            <tr class="optval">
+               <th scope="row">{{opt}} : <input type="number" value="{{opt.optionvalue}}" class="optcls" style="width:60px"/>
+                   <select name="option"  width="3" class="ddlopt" id="opt{{opt.id}}">
+                       <option value="N">No</option>
+                       <option value="Y">Yes</option>
+                     </select>
+               </th>
+               {% for i in items %}
+                    <td class="tdopt"> 0 </td>
+               {% endfor %}
+           </tr>
+           {% endif %}
+     {% endfor %}
+           <tr id='tos'>
+               <th>Total Options :</th>
+               {% for i in items %}
+               <td> 0 </td>
+               {% endfor %}
+           </tr>
+           <tr style="background-color: rgb(39, 185, 243)">
+               <th></th>
+               {% for i in items %}
+               <td>  </td>
+               {% endfor %}
+           </tr>
+           <!-- <tr id='tsp'>
+               <th>Total Sales Price Net/Unit C$ :</th>
+               {% for i in items %}
+               <td>  </td>
+               {% endfor %}
+           </tr>
+           <tr id='fly'>
+               <th>Flyer Price(C) :</th>
+               {% for i in items %}
+               <td>  </td>
+               {% endfor %}
+           </tr> -->
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    {% endif %}
+ </div>
+ 
+<!-- =================================(END)====================================== -->
+
+
+
+
+            <!-- ############## IMPORT TABLE ############## -->
+            {%if improdata %}
+            {% for imd in improdata %}
+            <div class="text-center mx-auto">
+                <h1 style="text-align:center;">
+                    <strong class="text-primary">{{ imd.productname }}</strong>
+                </h1>
+            </div>
+         <div class="table-responsive table-striped">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Item Number</th>
+                        <th scope="col">{{ imd.sku }}</th>
+                        {% for i in test %}
+                        <th scope="col"></th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <tr>
+                        <th scope="row">Quantities</th>
+                        {% for i in items %}
+                        <td> {{i.quantity}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Factory Cost</th>
+                        {% for i in items %}
+                        <td> {{i.price}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Setup Fee</th>
+                        {% for i in items %}
+                        <td> {{i.setupfee}} </td>
+                        {% endfor %}
+                        </tr>
+                        <tr style="background-color: rgb(142, 253, 253);" id='pcc'>
+                        <th scope="row">Product Cost C$</th>
+                        {% for i in items %}
+                        <td> {{i.productcost}} </td>
+                        {% endfor %}
+                    </tr>
+                        <tr id='inp'>
+                        <th scope="row">Target Gross Profit(in%)</th>
+                        {% for i in items %}
+                        <td><input type="number" value="{{ imd.targetgrossprofit }}" class="tgp" style="width:60px"></td>
+                        {% endfor %}
+                        </tr>
+                        <tr style="background-color: rgb(142, 253, 253);" id='bcps'>
+                        <th scope="row">Base Product Sales Price C$</th>
+                        {% for i in items %}
+                        <td> {{i.baseproductsalesprice}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Freight / Unit</th>
+                        {% for i in items %}
+                        <td> {{i.freight}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Freight Mark-Up/ Unit</th>
+                        {% for i in items %}
+                        <td> {{i.freightadmin}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr style="background-color: rgb(142, 253, 253);">
+                        <th scope="row" >Total Freight U$</th>
+                        {% for i in items %}
+                        <td> {{i.totalfrieght}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row" >Duty (in %) :
+                            <input type="number" size="30" value="{{imd.duty}}">
+                        </th>
+                        {% for i in items %}
+                        <td> {{i.duty}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row" >Mark-Up (in %) :
+                       <input type="number" size="30" value="{{imd.markup}}">
+                        </th>
+                        {% for i in items %}
+                        <td> {{i.markup}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr style="background-color: rgb(142, 253, 253);">
+                        <th scope="row" >Net Duty U$
+                        </th>
+                        {% for i in items %}
+                        <td> {{i.netduty}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr style="background-color: rgb(34, 247, 97);">
+                        <th scope="row">Sub Total</th>
+                        {% for i in items %}
+                        <td> {{i.subtotal}} </td>
+                        {% endfor %}
+                    </tr>
+                    <tr style="background-color: rgb(148, 148, 137)">
+                        <th></th>
+                        {% for i in items %}
+                        <td>  </td>
+                        {% endfor %}
+                    </tr>
+                    <tr style="background-color: yellow">
+                        <th>Options</th>
+                        {% for i in items %}
+                        <td>  </td>
+                        {% endfor %}
+                </tr>
+                <tr style="background-color: skyblue">
+                   <th>
+                       Markup Rate(in %) :
+                       <input id="mrk" type="number" size="30" value="{{imd.markuprate}}">
+                    </th>
+                   {% for i in items %}
+                   <td>  </td>
+                   {% endfor %}
+           </tr>
+           {% for opt in options %}
+           {% if imd.sku == opt.sku %}
+           <tr style="background-color: skyblue">
+            <tr class="optval">
+                <th scope="row">{{opt}} : <input type="number" step="0.01" value="{{opt.optionvalue}}" class="optcls" style="width:60px"/>
+                    <select name="option"  width="3" class="ddlopt" id="opt{{opt.id}}">
+                        <option value="N">No</option>
+                        <option value="Y">Yes</option>
+                      </select>
+                </th>
+                {% for i in items %}
+                <td class="tdopt"> 0 </td>
+                {% endfor %}
+            </tr>
+            </tr>
+                {% endif %}
+                {% endfor %}
+               <tr id='tos' style="background-color: rgb(34, 247, 97);">
+                   <th>Total Options :</th>
+                   {% for i in items %}
+                   <td>  0</td>
+                   {% endfor %}
+               </tr>
+               <tr style="background-color: rgb(148, 148, 137)">
+                <th></th>
+                {% for i in items %}
+                <td>  </td>
+                {% endfor %}
+            </tr>
+               <tr >
+                   <th><button  id="toggle-btn" class="btn btn-outline-dark" onclick="myFunction()"> Additional Options </button></th>
+                   {% for i in items %}
+                   <td> </td>
+                   {% endfor %}
+               </tr>
+            {% for addopt in addoptions %}
+           {% if imd.sku == addopt.sku %}
+           <tr style="background-color: skyblue">
+            <tr class="optval" id="myDIV">
+                <th scope="row">{{addopt}} : <input type="number" step="0.01" value="{{addopt.optionvalue}}" size="3" class="optcls">
+                </th>
+                {% for i in items %}
+                <td class="tdopt"> 0 </td>
+                {% endfor %}
+            </tr>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            <tr style="background-color: skyblue">
+                <th> Total Sales Price Net Unit U$ </th>
+                {% for i in items %}
+                <td> 0 </td>
+                {% endfor %}
+        </tr>
+        <tr>
+            <th>
+                Forex :
+                <input  type="number" size="30" value="{{imd.forex}}">
+             </th>
+            {% for i in items %}
+            <td> {{i.forex}} </td>
+            {% endfor %}
+    </tr>
+    <tr style="background-color: skyblue">
+        <th> Total Sales Price Net Unit C$ </th>
+        {% for i in items %}
+        <td> 0 </td>
+        {% endfor %}
+</tr>
+    <tr>
+        <th>Flyer Price(C)</th>
+        {% for i in items %}
+        <td> 0 </td>
+        {% endfor %}
+</tr>
+<tr>
+    <th>Flyer Price(R)</th>
+    {% for i in items %}
+    <td> 0 </td>
+    {% endfor %}
+</tr>
+<tr>
+    <th></th>
+    {% for i in items %}
+    <td>  </td>
+    {% endfor %}
+</tr>
+
+<tr>
+    <th>Overall GrossMargin$ (In USD)</th>
+    {% for i in items %}
+    <td> 0 </td>
+    {% endfor %}
+</tr>
+<tr>
+    <th>Overall GrossMargin$ (In %)</th>
+    {% for i in items %}
+    <td> 0 </td>
+    {% endfor %}
+</tr>
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+        {% endif%}
+
+     </div>
+    <script src="{% static 'jquery.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <script>
+        $("#sel1").change(function() {
+        var item=$(this);
+        var id = $(this).children(":selected").attr("id");
+        $.ajax({
+            type: 'POST',
+            url: '/main/',
+            data: {
+            'value': id,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            dataType:'json',
+            success: function(data) {;
+                $.each(data, function (key, entry) {
+                    var cat=$('#ddlcat');
+                    var subcat = $('#ddlsubcat');
+                    var pro = $('#ddlpro');
+                    cat.empty()
+                    subcat.empty()
+                    pro.empty()
+                    var part = $('#ddlcat');
+                    part.empty().append($('<option></option>').val('').text('--Select--'));
+                    $.each(entry, function (index, item) {
+                        var newitem = item.split('>>')[0]
+                        var skunum = item.split('>>')[1]
+                        part.append($('<option></option>').val(skunum).text(newitem));
+                    });
+
+                });
+            }
+        });
+        return false;
+        });
+        $("#sel2").change(function() {
+        var item=$('#ddlcat').val();
+        var region = $('#sel1').val();
+        $.ajax({
+            type: 'POST',
+            url: '/subcat/',
+            data: {
+            'value': item,
+            'region':region,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            dataType:'json',
+            success: function(data) {
+                $.each(data, function (key, entry) {
+                    var part = $('#ddlsubcat');
+                    part.empty().append($('<option></option>').val('').text('--Select--'));
+                    $.each(entry, function (index, item) {
+                        var newitem = item.split('>>')[0]
+                        var subnum = item.split('>>')[1]
+                        var catnum = item.split('>>')[2]
+                        seprate = subnum +">"+catnum
+                        part.append($('<option></option>').val(seprate).text(newitem));
+                    });
+                });
+            }
+        });
+        return false;
+        });
+        $("#sel3").change(function() {
+        var region = $('#sel1').val()
+        var value = $('#ddlsubcat').val()
+
+        $.ajax({
+            type: 'POST',
+            url: '/productname/',
+            data: {
+            'region':region,
+            'value':value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            dataType:'json',
+            success: function(data) {
+                $.each(data, function (key, entry) {
+                    var part = $('#ddlpro');
+                    part.empty().append($('<option></option>').val('').text('--Select--'));
+                    $.each(entry, function (index, item) {
+                        var newitem = item.split('>>')[0]
+                        var skunum = item.split('>>')[1]
+                        part.append($('<option></option>').val(skunum).text(newitem));
+                    });
+                });
+            }
+        });
+        return false;
+        });
+
+        function myFunction() {
+        $("#myDIV").toggle();
+        }
+    </script>
+    <!-- <script src="{% static 'main.js' %}"></script> -->
+    <script>
+        $( document ).ready(function() {
+    var i;
+    for (i = 0; i < $('#pcc').children().length; i++) {
+    $('#pcc').children().eq(i).attr('id','pc'+i)
+    $('#bcps').children().eq(i).attr('id','bcp'+i)
+    $('#inp').children().eq(i).attr('id','inpu'+i)
+    $('#tos').children().eq(i).attr('id','tos'+i);
+    $('#tsp').children().eq(i).attr('id','tsp'+i);
+    $('#fly').children().eq(i).attr('id','fly'+i);
+     var bcp_input=parseFloat($('#bcps').children('td').eq(i).html());
+       var tos=parseFloat($('#tos').children('td').eq(i).html());
+       var tsp=parseFloat(bcp_input+tos);
+      // console.log($('#bcps >td > #bcp'+(i+1)).html('ll'));
+       $('#tsp').children('td').eq(i).html(tsp);
+       var input_Flyer=parseFloat(tsp/0.6).toFixed(2);
+       $('#fly').children('td').eq(i).html(input_Flyer);
+     }
+
+    $(".tgp").change(function(){
+    var id = $(this).closest('td').attr('id');
+    var value = $(this).val();
+
+    var nid =  id.split('u')[1]
+    var chg_val = $('#pc'+nid).html();
+    if (value==100){
+        set_val = chg_val/(1-(value/100));
+        $('#bcp'+nid).html('0.00');
+    }
+    else{
+        var set_val = chg_val/(1-(value/100));
+        $('#bcp'+nid).html(set_val.toFixed(2));
+    }
+    for (i = 0; i < $('#pcc').children().length; i++) {
+    calc_total(i);
+    var bcp_input=parseFloat($('#bcps').children('td').eq(i).html());
+    var tos=parseFloat($('#tos').children('td').eq(i).html());
+
+    var tsp=parseFloat(bcp_input+tos).toFixed(2);
+
+    $('#tsp').children('td').eq(i).html(tsp);
+    var input_Flyer=parseFloat(tsp/0.6).toFixed(2);
+    $('#fly').children('td').eq(i).html(input_Flyer);
+    }
+    });
+    $('#mrk').change(function(){
+    $('.'+$('select.ddlopt').attr('class')).each(function(i){
+        for (i = 0; i < $(this).parents('.optval').find('.tdopt').length; i++) {
+            if($(this).val()=='Y'){
+                var new_val = parseFloat($(this).prev().val()*(1+($('#mrk').val()/100))).toFixed(2);
+                $(this).parents('.optval').children('td').eq(i).html(new_val);
+            }
+            calc_total(i);
+            var bcp_input=parseFloat($('#bcps').children('td').eq(i).html());
+            var tos=parseFloat($('#tos').children('td').eq(i).html());
+            var tsp=parseFloat(bcp_input+tos).toFixed(2);
+            $('#tsp').children('td').eq(i).html(tsp);
+            var input_Flyer=parseFloat(tsp/0.6).toFixed(2);
+            $('#fly').children('td').eq(i).html(input_Flyer);
+        }
+    });
+    });
+
+    $('.optcls').change(function(){
+    var parent = $(this).closest('tr');
+        var inpval=$(this).val();
+        var ddl =$(this).next().val();
+
+        for (i = 0; i < $(this).parents('.optval').find('.tdopt').length; i++) {
+        $(this).parents('.optval').children('td').eq(i).attr('id','tdopt'+i)
+        if(ddl=='Y'){
+                var new_val = parseFloat(inpval*(1+($('#mrk').val()/100))).toFixed(2);
+                $('#tdopt'+i).html(new_val);
+                $('.total',parent).text(new_val);
+                calc_total(i);
+                var bcp_input=parseFloat($('#bcps').children('td').eq(i).html());
+                var tos=parseFloat($('#tos').children('td').eq(i).html());
+                var tsp=parseFloat(bcp_input+tos).toFixed(2);
+            $('#tsp').children('td').eq(i).html(tsp);
+            var input_Flyer=parseFloat(tsp/0.6).toFixed(2);
+            $('#fly').children('td').eq(i).html(input_Flyer);
+        }
+        $('#tdopt'+i).removeAttr("id");
+
+        }
+
+    })
+    $('.ddlopt').change(function(){
+    var ddl=$(this).val();
+        //console.log($("#opt +i option[value= " + $(this).val() + "]").attr("selected", "selected"));
+        //var option = $('option:selected', this).attr('value');
+        // $(".ddlopt option[value= " + this.value + "]").attr("selected", "selected");
+        var inpval =$(this).prev().val();
+        for (i = 0; i < $(this).parents('.optval').find('.tdopt').length; i++) {
+        $(this).parents('.optval').children('td').eq(i).attr('id','tdopt'+i);
+        if(ddl=='Y'){
+                var new_val = parseFloat(inpval*(1+($('#mrk').val()/100))).toFixed(2);
+                $('#tdopt'+i).html(new_val);
+        }
+        else{
+        $('#tdopt'+i).html(0);
+        }
+        calc_total(i);
+        var bcp_input=parseFloat($('#bcps').children('td').eq(i).html());
+        var tos=parseFloat($('#tos').children('td').eq(i).html());
+        var tsp=parseFloat(bcp_input+tos).toFixed(2);
+        $('#tsp').children('td').eq(i).html(tsp);
+        var input_Flyer=parseFloat(tsp/0.6).toFixed(2);
+        $('#fly').children('td').eq(i).html(input_Flyer);
+        $('#tdopt'+i).removeAttr("id");
+        }
+    })
+    function calc_total(index) {
+        var total = 0;
+        $('table .optval').each(function() {
+    //  console.log($('td', this).eq(index).length);
+            var value = parseFloat($('td', this).eq(index).text());
+            if (!isNaN(value)) {
+                total += value;
+            }
+        });
+        $('#tos').children('td').eq(index).text(total.toFixed(2));
+    }
+
+
+    });
+    </script>
+
+</body>
+</html>
